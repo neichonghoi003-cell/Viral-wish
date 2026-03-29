@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spin & Win </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background: linear-gradient(135deg, #36d1dc, #5b86e5);
+            color: white;
+            margin: 0;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        .wheel-container {
+            position: relative;
+            margin-top: 30px;
+        }
+
+        canvas {
+            background: white;
+            border-radius: 50%;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            background: gold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2> Spin & Win Game</h2>
+
+<div class="wheel-container">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="300" height="300"></canvas>
+</div>
+
+<button onclick="spin()">SPIN</button>
+<button onclick="shareGame()"> Share</button>
+
+<p id="result"></p>
+
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const prizes = [
+    " Tell a Joke",
+    " Sing a Song",
+    " Dance for 10 sec",
+    " Eat Chocolate",
+    " Take a Selfie",
+    " Play Again"
+];
+
+let angle = 0;
+let spinning = false;
+
+function drawWheel() {
+    let arc = Math.PI * 2 / prizes.length;
+
+    for (let i = 0; i < prizes.length; i++) {
+        let start = i * arc;
+
+        ctx.beginPath();
+        ctx.fillStyle = i % 2 === 0 ? "#ffcc00" : "#ff6600";
+        ctx.moveTo(150,150);
+        ctx.arc(150,150,150,start,start+arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(150,150);
+        ctx.rotate(start + arc/2);
+        ctx.fillStyle = "#000";
+        ctx.fillText(prizes[i], 50, 0);
+        ctx.restore();
+    }
+}
+
+drawWheel();
+
+function spin() {
+    if (spinning) return;
+
+    spinning = true;
+
+    let spinAngle = Math.random() * 360 + 1440;
+    let current = 0;
+
+    let interval = setInterval(() => {
+        current += 10;
+        angle += 10;
+        canvas.style.transform = `rotate(${angle}deg)`;
+
+        if (current >= spinAngle) {
+            clearInterval(interval);
+            showResult();
+            spinning = false;
+        }
+    }, 20);
+}
+
+function showResult() {
+    let deg = angle % 360;
+    let index = Math.floor((360 - deg) / (360 / prizes.length));
+
+    let prize = prizes[index];
+
+    document.getElementById("result").innerText =
+        " Your task: " + prize + " ";
+}
+
+//  Share function
+function shareGame() {
+    let text = " I just played this fun Spin & Win game! Try it now ";
+
+    if (navigator.share) {
+        navigator.share({
+            title: "Spin & Win Game",
+            text: text,
+            url: window.location.href
+        });
+    } else {
+        // fallback for WhatsApp
+        let url = "https://wa.me/?text=" + encodeURIComponent(text + " " + window.location.href);
+        window.open(url, "_blank");
+    }
+}
+</script>
+
+</body>
+</html>
